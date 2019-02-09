@@ -1,3 +1,4 @@
+import sys
 import threading
 import time
 
@@ -6,6 +7,8 @@ class PleaseHold():
         self._loading_thread = threading.Thread(name='loading', target=self._loading)
         self._loading_delay = delay
         self._loading_symbol = symbol
+        self._loading_msg = ''
+        self._loading_lock = threading.RLock()
         self._event = threading.Event()
 
     
@@ -30,7 +33,8 @@ class PleaseHold():
         
         
     def start(self, msg):
-        print(msg, end='', flush=True)
+        self._loading_msg = msg
+        print(self._loading_msg, end='', flush=True)
         
         self._event.set()
         
@@ -47,7 +51,22 @@ class PleaseHold():
         self._event.clear()
         
         
+    def push(self, msg):
+        self._event.clear()
+
+        sys.stdout.write('\033[K') # Clear the line
+        sys.stdout.write('\033[F') # Move up one line
+        sys.stdout.write('\n')     # Put pushed message on new line
+        print(msg)
+        with self._loading_lock:
+            print(self._loading_msg, end='')
+
+        self._event.set()
+
+
     def _loading(self):
         while self._event.is_set():
+            with self._loading_lock:
+                self._loading_msg += self._loading_symbol
             print(self._loading_symbol, end='', flush=True)
             time.sleep(self._loading_delay)
