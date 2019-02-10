@@ -52,21 +52,17 @@ class PleaseHold():
         
         
     def push(self, msg):
-        self._event.clear()
-
-        sys.stdout.write('\033[K') # Clear the line
-        sys.stdout.write('\033[F') # Move up one line
-        sys.stdout.write('\n')     # Put pushed message on new line
-        print(msg)
         with self._loading_lock:
+            sys.stdout.write('\033[K') # Clear the line
+            sys.stdout.write('\033[F') # Move up one line
+            sys.stdout.write('\n')     # Put pushed message on new line
+            print(msg)
             print(self._loading_msg, end='')
-
-        self._event.set()
 
 
     def _loading(self):
         while self._event.is_set():
             with self._loading_lock:
                 self._loading_msg += self._loading_symbol
-            print(self._loading_symbol, end='', flush=True)
+                print(self._loading_symbol, end='', flush=True)
             time.sleep(self._loading_delay)
