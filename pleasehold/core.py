@@ -56,18 +56,18 @@ class PleaseHold():
                 
         
     def end(self):
-        print(self._end_msg, flush=True)
         self._event.clear()
         self._loading_thread.join()
+        print(self._end_msg, flush=True)
         
         
     def push(self, msg):
         with self._loading_lock:
-            sys.stdout.write('\033[K') # Clear the line
-            sys.stdout.write('\033[F') # Move up one line
-            sys.stdout.write('\n')     # Put pushed message on new line
-            print(msg)
-            print(self._begin_msg, end='')
+            sys.stdout.write('\x1b[2K\r') # Clear the line
+            sys.stdout.write('\033[F')    # Move up one line
+            sys.stdout.write('\n')        # Put pushed message on new line
+            print(msg, flush=True)
+            print(self._begin_msg, end='', flush=True)
 
 
     def _loading(self):
