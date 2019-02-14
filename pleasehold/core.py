@@ -58,6 +58,7 @@ class PleaseHold():
     def end(self):
         print(self._end_msg, flush=True)
         self._event.clear()
+        self._loading_thread.join()
         
         
     def push(self, msg):
