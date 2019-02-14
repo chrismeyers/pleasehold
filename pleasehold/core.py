@@ -3,15 +3,25 @@ import threading
 import time
 
 class PleaseHold():
-    def __init__(self, delay=1.0, symbol='.'):
+    def __init__(self, begin_msg='begin', end_msg='end', delay=1.0, symbol='.'):
+        self._begin_msg = begin_msg
+        self._end_msg = end_msg
         self._loading_thread = threading.Thread(name='loading', target=self._loading)
         self._loading_delay = delay
         self._loading_symbol = symbol
-        self._loading_msg = ''
         self._loading_lock = threading.RLock()
         self._event = threading.Event()
 
     
+    def __enter__(self):
+        self.start()
+        return self
+
+
+    def __exit__(self, type, value, traceback):
+        self.end()
+
+
     @property
     def loading_delay(self):
         return self._loading_delay
@@ -32,9 +42,8 @@ class PleaseHold():
         self._loading_symbol = value
         
         
-    def start(self, msg):
-        self._loading_msg = msg
-        print(self._loading_msg, end='', flush=True)
+    def start(self):
+        print(self._begin_msg, end='', flush=True)
         
         self._event.set()
         
@@ -46,8 +55,8 @@ class PleaseHold():
                 self._loading_thread.start()
                 
         
-    def end(self, msg):
-        print(msg, flush=True)
+    def end(self):
+        print(self._end_msg, flush=True)
         self._event.clear()
         
         
@@ -57,12 +66,16 @@ class PleaseHold():
             sys.stdout.write('\033[F') # Move up one line
             sys.stdout.write('\n')     # Put pushed message on new line
             print(msg)
-            print(self._loading_msg, end='')
+            print(self._begin_msg, end='')
 
 
     def _loading(self):
         while self._event.is_set():
             with self._loading_lock:
-                self._loading_msg += self._loading_symbol
+                self._begin_msg += self._loading_symbol
                 print(self._loading_symbol, end='', flush=True)
             time.sleep(self._loading_delay)
+
+
+def hold(begin_msg='begin', end_msg='end', delay=1.0, symbol='.'):
+    return PleaseHold(begin_msg, end_msg, delay, symbol)

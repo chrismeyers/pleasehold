@@ -1,1 +1,1 @@
-from pleasehold.core import *
+from pleasehold.core import hold
