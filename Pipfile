@@ -5,6 +5,7 @@ verify_ssl = true
 
 [dev-packages]
 pleasehold = {editable = true,path = "."}
+pytest = "*"
 
 [packages]
 
