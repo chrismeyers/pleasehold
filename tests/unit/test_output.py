@@ -3,6 +3,7 @@ from collections import Counter
 import pytest
 import pleasehold
 
+
 def test_push(capsys):
     duration = 2
     push_msg = 'push'

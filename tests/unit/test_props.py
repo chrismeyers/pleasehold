@@ -1,6 +1,7 @@
 import pytest
 import pleasehold
 
+
 def test_begin_msg():
     with pleasehold.hold() as holding:
         assert holding.begin_msg == 'begin'

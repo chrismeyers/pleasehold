@@ -3,6 +3,7 @@ import math
 import pytest
 import pleasehold
 
+
 def test_duration():
     duration = 5
     begin = time.time()

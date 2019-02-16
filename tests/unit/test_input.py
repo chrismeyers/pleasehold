@@ -3,6 +3,7 @@ from collections import Counter
 import pytest
 import pleasehold
 
+
 def test_push_from_input(capsys, monkeypatch):
     duration = 2
     input_msg = 'mock'
@@ -22,6 +23,7 @@ def test_push_from_input(capsys, monkeypatch):
     stdout = captured.out.split('\n')
 
     assert stdout[2] == input_msg
+
 
 def test_symbols_after_input(capsys, monkeypatch):
     duration = 2
