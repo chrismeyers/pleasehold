@@ -11,7 +11,7 @@ def test_push(capsys):
         time.sleep(duration)
     captured = capsys.readouterr()
 
-    # The first line of stdout contains the escape sequence that clears the line
+    # The first line of stdout contains the clear line escape sequence
     stdout = captured.out.split('\n')
 
     assert stdout[1] == push_msg
@@ -28,4 +28,4 @@ def test_symbols(capsys):
     captured = capsys.readouterr()
     c = Counter(captured.out)
 
-    assert c[symbol] == duration * delay
+    assert c[symbol] == (duration * delay)

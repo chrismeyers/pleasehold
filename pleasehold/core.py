@@ -1,6 +1,7 @@
 import sys
 import threading
 import time
+from . import terminal as term
 
 class PleaseHold():
     def __init__(self, begin_msg='begin', end_msg='end', delay=1.0, symbol='.'):
@@ -63,6 +64,11 @@ class PleaseHold():
         self._symbol = value
 
 
+    @property
+    def loading_event(self):
+        return self._loading_event
+
+
     def start(self, msg=None):
         self._begin_msg = msg if msg is not None else self._begin_msg
 
@@ -89,9 +95,9 @@ class PleaseHold():
 
     def push(self, msg):
         with self._loading_lock:
-            sys.stdout.write('\x1b[2K\r') # Clear the line
-            sys.stdout.write('\033[F')    # Move up one line
-            sys.stdout.write('\n')        # Put pushed message on new line
+            term.clear_line()
+            term.move_line_up()
+            term.move_line_down()
             print(msg, flush=True)
             print(f'{self._begin_msg}{self._loading_ticks}', end='', flush=True)
 
@@ -104,5 +110,27 @@ class PleaseHold():
             time.sleep(self._delay)
 
 
+class Transfer():
+    def __init__(self, holding):
+        self._holding = holding
+
+
+    def __enter__(self):
+        term.move_line_down()
+        self._holding.loading_event.clear()
+        return self
+
+
+    def __exit__(self, type, value, traceback):
+        for _ in range(2):
+            term.clear_line()
+            term.move_line_up()
+        self._holding.start()
+
+
 def hold(begin_msg='begin', end_msg='end', delay=1.0, symbol='.'):
     return PleaseHold(begin_msg, end_msg, delay, symbol)
+
+
+def transfer(holding):
+    return Transfer(holding)

@@ -20,6 +20,4 @@ if __name__ == '__main__':
         holding.push('pushed something')
         time.sleep(2)
 
-    # TODO: Handle stdin (sudo prompt). Pause loading?
-
     print(f'time elapsed: {time.time() - before}')
