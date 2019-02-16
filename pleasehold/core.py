@@ -8,6 +8,7 @@ class PleaseHold():
         self._end_msg = end_msg
         self._delay = delay
         self._symbol = symbol
+        self._loading_ticks = ''
         self._loading_thread = threading.Thread(name='loading', target=self._loading)
         self._loading_lock = threading.RLock()
         self._loading_event = threading.Event()
@@ -92,13 +93,13 @@ class PleaseHold():
             sys.stdout.write('\033[F')    # Move up one line
             sys.stdout.write('\n')        # Put pushed message on new line
             print(msg, flush=True)
-            print(self._begin_msg, end='', flush=True)
+            print(f'{self._begin_msg}{self._loading_ticks}', end='', flush=True)
 
 
     def _loading(self):
         while self._loading_event.is_set():
             with self._loading_lock:
-                self._begin_msg += self._symbol
+                self._loading_ticks += self._symbol
                 print(self._symbol, end='', flush=True)
             time.sleep(self._delay)
 
