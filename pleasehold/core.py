@@ -101,6 +101,7 @@ class PleaseHold():
 class Transfer():
     def __init__(self, holding):
         self._holding = holding
+        self._num_inputs = 0
 
     def __enter__(self):
         term.move_line_down()
@@ -108,10 +109,14 @@ class Transfer():
         return self
 
     def __exit__(self, type, value, traceback):
-        for _ in range(2):
+        for _ in range(self._num_inputs + 1):
             term.clear_line()
             term.move_line_up()
         self._holding.start()
+
+    def input(self, msg):
+        self._num_inputs += 1
+        return input(msg)
 
 
 def hold(begin_msg='begin', end_msg='end', delay=1.0, symbol='.'):
