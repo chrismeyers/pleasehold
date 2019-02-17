@@ -8,6 +8,3 @@ pleasehold = {editable = true,path = "."}
 pytest = "*"
 
 [packages]
-
-[requires]
-python_version = "3.7"
