@@ -4,7 +4,7 @@ import pytest
 import pleasehold
 
 
-def test_push_from_input(capsys, monkeypatch):
+def test_push_from_input(capfd, monkeypatch):
     duration = 2
     input_msg = 'mock'
 
@@ -16,7 +16,7 @@ def test_push_from_input(capsys, monkeypatch):
             stdin = input(input_msg)
         holding.push(stdin)
         time.sleep(duration)
-    captured = capsys.readouterr()
+    captured = capfd.readouterr()
 
     # The first line of stdout contains the begin msg and loading ticks
     # The second line of stdout contains the clear line escape sequence
@@ -25,7 +25,7 @@ def test_push_from_input(capsys, monkeypatch):
     assert stdout[2] == input_msg
 
 
-def test_symbols_after_input(capsys, monkeypatch):
+def test_symbols_after_input(capfd, monkeypatch):
     duration = 2
     sleeps = 0
     input_msg = 'mock'
@@ -44,7 +44,7 @@ def test_symbols_after_input(capsys, monkeypatch):
         holding.push(stdin)
         time.sleep(duration)
         sleeps += 1
-    captured = capsys.readouterr()
+    captured = capfd.readouterr()
 
     stdout = captured.out.strip().split('\n')
     c = Counter(stdout[-1])
