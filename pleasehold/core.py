@@ -13,7 +13,7 @@ class PleaseHold():
         self._loading_ticks = ''
         self._loading_thread = threading.Thread(
             name='loading', target=self._loading)
-        self._loading_lock = threading.RLock()
+        self._loading_lock = threading.Lock()
         self._loading_event = threading.Event()
 
     def __enter__(self):
@@ -103,8 +103,8 @@ class Transfer():
         self._holding = holding
 
     def __enter__(self):
-        term.move_line_down()
         self._holding.loading_event.clear()
+        term.move_line_down()
         return self
 
     def __exit__(self, type, value, traceback):

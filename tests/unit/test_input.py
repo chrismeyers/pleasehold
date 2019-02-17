@@ -26,6 +26,16 @@ def test_push_from_input(capsys, monkeypatch):
 
 
 def test_symbols_after_input(capsys, monkeypatch):
+    # The number of symbols generated is sometimes one greater than expected.
+    # This is because the loading thread is sometimes in the middle of a tick
+    # when input is requested.
+    #
+    # Increase the range to stress test this.
+    for _ in range(100):
+        _symbols_after_input(capsys, monkeypatch)
+
+
+def _symbols_after_input(capsys, monkeypatch):
     duration = 2
     sleeps = 0
     input_msg = 'mock'
@@ -49,6 +59,4 @@ def test_symbols_after_input(capsys, monkeypatch):
     stdout = captured.out.strip().split('\n')
     c = Counter(stdout[-1])
 
-    # TODO: c[symbol] is sometimes one greater than expected. It may be related
-    # to monkey patching input(). Look into this...
     assert c[symbol] == int((delay * duration) * sleeps)
