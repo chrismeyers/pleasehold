@@ -1,6 +1,8 @@
 import sys
 import threading
 import time
+import io
+from . import stream_tee
 from . import terminal as term
 
 
@@ -62,7 +64,7 @@ class PleaseHold():
     def start(self, msg=None):
         self._begin_msg = msg if msg is not None else self._begin_msg
 
-        print(self._begin_msg, end='', flush=True)
+        print(f'{self._begin_msg}{self._loading_ticks}', end='', flush=True)
 
         self._loading_event.set()
 
@@ -101,14 +103,19 @@ class PleaseHold():
 class Transfer():
     def __init__(self, holding):
         self._holding = holding
+        self._output_stream = io.StringIO()
+        self._stream_tee = stream_tee.StreamTee(
+            sys.stdout, self._output_stream, holding.symbol)
 
     def __enter__(self):
-        self._holding.loading_event.clear()
+        sys.stdout = self._stream_tee
         term.move_line_down()
+        self._holding.loading_event.clear()
         return self
 
     def __exit__(self, type, value, traceback):
-        for _ in range(2):
+        sys.stdout = sys.__stdout__
+        for _ in range(self._stream_tee.num_inputs + 1):
             term.clear_line()
             term.move_line_up()
         self._holding.start()
