@@ -26,7 +26,8 @@ class StreamTee(object):
 
     def __methodmissing__(self, *args, **kwargs):
         '''Callback for events coming from the original stream'''
-        if len(args) > 0 and args[0] != '\n' and args[0] != self._loading_symbol:
+        if (len(args) > 0 and args[0] != '\n' and args[0] != ''
+                and args[0] != self._loading_symbol):
             self._num_inputs += 1
 
         # Emit method call to the forked stream
