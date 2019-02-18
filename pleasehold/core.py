@@ -7,6 +7,18 @@ from . import terminal as term
 
 
 class PleaseHold():
+    '''Manages the loading thread and handles pushing notifications.
+
+    This class supports the use of a context manager:
+        with pleasehold.hold() as holding:
+            ...
+
+    Args:
+        begin_msg (str, optional): The message to the left of the loading bar
+        end_msg (str, optional): The message to the right of the loading bar
+        delay (float, optional):  The delay between printing loading symbols
+        symbol (str, optional): The symbol to be used in the loading bar
+    '''
     def __init__(self, begin_msg='begin', end_msg='end', delay=1.0, symbol='.'):
         self._begin_msg = begin_msg
         self._end_msg = end_msg
@@ -19,14 +31,21 @@ class PleaseHold():
         self._loading_event = threading.Event()
 
     def __enter__(self):
+        '''Starts the loading thread if this class is initialized via a context
+        manager
+        '''
         self.start()
         return self
 
     def __exit__(self, type, value, traceback):
+        '''Joins the loading thread if this class is initialized via a context
+        manager
+        '''
         self.end()
 
     @property
     def begin_msg(self):
+        '''str: gets or sets the message to the left of the loading bar'''
         return self._begin_msg
 
     @begin_msg.setter
@@ -35,6 +54,7 @@ class PleaseHold():
 
     @property
     def end_msg(self):
+        '''str: gets or sets the message to the right of the loading bar'''
         return self._end_msg
 
     @end_msg.setter
@@ -43,6 +63,7 @@ class PleaseHold():
 
     @property
     def delay(self):
+        '''float: gets or sets the delay between printing loading symbols'''
         return self._delay
 
     @delay.setter
@@ -51,6 +72,7 @@ class PleaseHold():
 
     @property
     def symbol(self):
+        '''str: gets or sets the symbol that's used in the loading bar'''
         return self._symbol
 
     @symbol.setter
@@ -59,9 +81,17 @@ class PleaseHold():
 
     @property
     def loading_event(self):
+        '''str: gets the threading.Event() instance used to interact with the
+        loading thread
+        '''
         return self._loading_event
 
     def start(self, msg=None):
+        '''Starts the loading thread and prints the begin message.
+
+        Args:
+            msg (str, optional): Used to override self._begin_msg
+        '''
         self._begin_msg = msg if msg is not None else self._begin_msg
 
         print(f'{self._begin_msg}{self._loading_ticks}', end='', flush=True)
@@ -77,6 +107,11 @@ class PleaseHold():
                 self._loading_thread.start()
 
     def end(self, msg=None):
+        '''Joins the loading thread and prints the end message.
+
+        Args:
+            msg (str, optional): Used to override self._end_msg
+        '''
         self._end_msg = msg if msg is not None else self._end_msg
 
         self._loading_event.clear()
@@ -85,6 +120,11 @@ class PleaseHold():
         print(self._end_msg, flush=True)
 
     def push(self, msg):
+        '''Pushes a message above the loading bar.
+
+        Args:
+            msg (str): The message to push
+        '''
         with self._loading_lock:
             term.clear_line()
             term.move_line_up()
@@ -101,6 +141,15 @@ class PleaseHold():
 
 
 class Transfer():
+    '''Pauses the loading thread to allow for user input
+
+    This class supports the use of a context manager:
+        with pleasehold.transfer(holding) as t:
+            ...
+
+    Args:
+        holding (PleaseHold): The instance of PleaseHold that should be paused
+    '''
     def __init__(self, holding):
         self._holding = holding
         self._output_stream = io.StringIO()
@@ -108,12 +157,18 @@ class Transfer():
             sys.stdout, self._output_stream, holding.symbol)
 
     def __enter__(self):
+        '''Pauses the PleaseHold loading thread and prepares for input if this
+        class is initialized via a context manager
+        '''
         sys.stdout = self._stream_tee
         term.move_line_down()
         self._holding.loading_event.clear()
         return self
 
     def __exit__(self, type, value, traceback):
+        '''Cleans up input prompts and resumes the PleaseHold loading thread if
+        this class is initialized via a context manager
+        '''
         sys.stdout = sys.__stdout__
         for _ in range(self._stream_tee.num_inputs + 1):
             term.clear_line()
@@ -122,8 +177,25 @@ class Transfer():
 
 
 def hold(begin_msg='begin', end_msg='end', delay=1.0, symbol='.'):
+    '''Instantiates an instance of PleaseHold.
+
+    The arguments are passed through to the PleaseHold constructor.
+
+    Args:
+        begin_msg (str, optional): The message to the left of the loading bar
+        end_msg (str, optional): The message to the right of the loading bar
+        delay (float, optional):  The delay between printing loading symbols
+        symbol (str, optional): The symbol to be used in the loading bar
+    '''
     return PleaseHold(begin_msg, end_msg, delay, symbol)
 
 
 def transfer(holding):
+    '''Instantiates an instance of Transfer.
+
+    The arguments are passed through to the Transfer constructor.
+
+    Args:
+        holding (PleaseHold): The instance of PleaseHold that should be paused
+    '''
     return Transfer(holding)

@@ -1,11 +1,15 @@
-'''
-This class forks a stream, allowing you to capture output while still displaying
-output in the terminal.
-
-See: http://www.tentech.ca/2011/05/stream-tee-in-python-saving-stdout-to-file-while-keeping-the-console-alive/
-'''
 class StreamTee(object):
-    # Based on https://gist.github.com/327585 by Anand Kunal
+    '''Forks a stream, allowing you to capture output while still displaying
+    output in the terminal.
+
+    See: http://www.tentech.ca/2011/05/stream-tee-in-python-saving-stdout-to-file-while-keeping-the-console-alive/
+
+    Args:
+        stream1 (:obj:`TextIOWrapper`): The original stream (ex: stdin, stdout)
+        stream2 (:obj:`StringIO`): A fork of the original stream
+        symbol (str, optional): The loading symbol set in the current instance
+            of PleaseHold
+    '''
     def __init__(self, stream1, stream2, symbol='.'):
         self._stream1 = stream1
         self._stream2 = stream2
@@ -21,6 +25,7 @@ class StreamTee(object):
         return getattr(self, '__methodmissing__')
 
     def __methodmissing__(self, *args, **kwargs):
+        '''Callback for events coming from the original stream'''
         if len(args) > 0 and args[0] != '\n' and args[0] != self._loading_symbol:
             self._num_inputs += 1
 
@@ -34,4 +39,6 @@ class StreamTee(object):
 
     @property
     def num_inputs(self):
+        '''Gets the number of inputs that have occurred during the Transfer
+        context'''
         return self._num_inputs
