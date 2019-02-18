@@ -6,6 +6,7 @@ if __name__ == '__main__':
     before = time.time()
 
     holding = pleasehold.hold('starting', 'complete')
+    transfer = pleasehold.transfer(holding)
 
     holding.start()
     time.sleep(2)
@@ -21,10 +22,14 @@ if __name__ == '__main__':
     holding.end_msg = 'end'
     holding.delay = 0.1
     holding.symbol = '#'
+    holding.loading_ticks = ''
 
     holding.start(msg='props changed')
     time.sleep(2)
-    holding.push('pushed something')
+    transfer.start()
+    stdin = input('enter a push notification: ')
+    transfer.end()
+    holding.push(stdin)
     time.sleep(2)
     holding.end()
 
