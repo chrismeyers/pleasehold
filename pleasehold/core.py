@@ -45,7 +45,7 @@ class PleaseHold():
 
     @property
     def begin_msg(self):
-        '''str: gets or sets the message to the left of the loading bar'''
+        '''str: Gets or sets the message to the left of the loading bar'''
         return self._begin_msg
 
     @begin_msg.setter
@@ -54,7 +54,7 @@ class PleaseHold():
 
     @property
     def end_msg(self):
-        '''str: gets or sets the message to the right of the loading bar'''
+        '''str: Gets or sets the message to the right of the loading bar'''
         return self._end_msg
 
     @end_msg.setter
@@ -63,7 +63,7 @@ class PleaseHold():
 
     @property
     def delay(self):
-        '''float: gets or sets the delay between printing loading symbols'''
+        '''float: Gets or sets the delay between printing loading symbols'''
         return self._delay
 
     @delay.setter
@@ -72,7 +72,7 @@ class PleaseHold():
 
     @property
     def symbol(self):
-        '''str: gets or sets the symbol that's used in the loading bar'''
+        '''str: Gets or sets the symbol that's used in the loading bar'''
         return self._symbol
 
     @symbol.setter
@@ -80,8 +80,20 @@ class PleaseHold():
         self._symbol = value
 
     @property
+    def loading_ticks(self):
+        '''str: Gets or sets the loading ticks
+
+        NOTE: The setter will always reset _loading_ticks to an empty string!
+        '''
+        return self._symbol
+
+    @loading_ticks.setter
+    def loading_ticks(self, value):
+        self._loading_ticks = ''
+
+    @property
     def loading_event(self):
-        '''str: gets the threading.Event() instance used to interact with the
+        '''str: Gets the threading.Event() instance used to interact with the
         loading thread
         '''
         return self._loading_event
@@ -160,15 +172,23 @@ class Transfer():
         '''Pauses the PleaseHold loading thread and prepares for input if this
         class is initialized via a context manager
         '''
-        sys.stdout = self._stream_tee
-        term.move_line_down()
-        self._holding.loading_event.clear()
+        self.start()
         return self
 
     def __exit__(self, type, value, traceback):
         '''Cleans up input prompts and resumes the PleaseHold loading thread if
         this class is initialized via a context manager
         '''
+        self.end()
+
+    def start(self):
+        '''Pauses the PleaseHold loading thread and prepares for input'''
+        sys.stdout = self._stream_tee
+        term.move_line_down()
+        self._holding.loading_event.clear()
+
+    def end(self):
+        '''Cleans up input prompts and resumes the PleaseHold loading thread'''
         sys.stdout = sys.__stdout__
         for _ in range(self._stream_tee.num_inputs + 1):
             term.clear_line()
